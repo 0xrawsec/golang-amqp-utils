@@ -1,6 +1,0 @@
-[submodule "github.com/streadway/amqp"]
-	path = github.com/streadway/amqp
-	url = https://github.com/streadway/amqp/
-[submodule "github.com/0xrawsec/golang-utils"]
-	path = github.com/0xrawsec/golang-utils
-	url = https://github.com/0xrawsec/golang-utils
