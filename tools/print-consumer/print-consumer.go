@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/0xrawsec/amqp"
 	"github.com/0xrawsec/golang-utils/args"
 	"github.com/0xrawsec/golang-utils/log"
-	"github.com/streadway/amqp"
 )
 
 var (

@@ -8,9 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/streadway/amqp"
-
-	"freebase.ninja/golang-utils/toolbox/log"
+	"github.com/0xrawsec/amqp"
+	"github.com/0xrawsec/golang-utils/log"
 )
 
 func init() {

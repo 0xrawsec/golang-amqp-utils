@@ -10,8 +10,8 @@ Properties:
 import (
 	"encoding/json"
 
+	"github.com/0xrawsec/amqp"
 	"github.com/0xrawsec/golang-utils/log"
-	"github.com/streadway/amqp"
 )
 
 // Config structure for Publisher
