@@ -53,9 +53,6 @@ func main() {
 		if err != nil {
 			log.LogErrorAndExit(fmt.Errorf("Failed to load configuration: %s", err))
 		}
-		/*if err := consumerConfig.LoadFromFile(configFile); err != nil {
-			log.LogError(err)
-		}*/
 	}
 
 	q := consumer.TemporaryQueue(queueName)
