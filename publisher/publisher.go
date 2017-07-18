@@ -8,30 +8,26 @@ Properties:
 */
 
 import (
+	"amqpconfig"
 	"encoding/json"
 
 	"github.com/0xrawsec/amqp"
 	"github.com/0xrawsec/golang-utils/log"
 )
 
-// Config structure for Publisher
-type Config struct {
-	AmqpURL string
-}
-
 // Publisher structure
 type Publisher struct {
-	Config       *Config
+	Config       *amqpconfig.Config
 	conn         *amqp.Connection
 	channel      *amqp.Channel
 	confirmation chan amqp.Confirmation
 }
 
-// NewBasicPublisher returns a basic forwarder (no ampq authentication)
-func NewBasicPublisher(config *Config) (p Publisher) {
+// NewPublisher returns a basic forwarder (no ampq authentication)
+func NewPublisher(config *amqpconfig.Config) (p Publisher) {
 	var err error
 	p.Config = config
-	p.conn, err = amqp.Dial(config.AmqpURL)
+	p.conn, err = amqp.DialTLS(config.AmqpURL, &(config.TLSConf))
 	if err != nil {
 		panic(err)
 	}

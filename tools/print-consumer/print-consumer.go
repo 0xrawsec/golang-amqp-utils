@@ -1,7 +1,9 @@
 package main
 
 import (
+	"amqpconfig"
 	"consumer"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"os"
@@ -15,12 +17,14 @@ import (
 var (
 	debug                   bool
 	queueName, exchangeName string
+	configPath              string
 	timeout                 args.DurationVar
 
 	exchangeType   = amqp.ExchangeFanout
-	consumerConfig = consumer.Config{
+	consumerConfig = amqpconfig.Config{
 		AmqpURL: os.Getenv("AMQP_URL"),
-		Workers: 1}
+		Workers: 1,
+		TLSConf: tls.Config{}}
 )
 
 // Function that just print the body of the of the message
@@ -35,6 +39,7 @@ func main() {
 		"(it is mandatory if on publisher side you do not publish to an exchange)")
 	flag.StringVar(&exchangeName, "e", exchangeName, "The exchange to be created")
 	flag.StringVar(&exchangeType, "ex-type", exchangeType, "Type of the exchange to be created")
+	flag.StringVar(&configPath, "c", configPath, "Path to configuration file")
 	flag.Var(&timeout, "t", "Timeout for consumer")
 	flag.Parse()
 
@@ -42,8 +47,19 @@ func main() {
 		log.InitLogger(log.LDebug)
 	}
 
+	if configPath != "" {
+		var err error
+		consumerConfig, err = amqpconfig.LoadConfigFromFile(configPath)
+		if err != nil {
+			log.LogErrorAndExit(fmt.Errorf("Failed to load configuration: %s", err))
+		}
+		/*if err := consumerConfig.LoadFromFile(configFile); err != nil {
+			log.LogError(err)
+		}*/
+	}
+
 	q := consumer.TemporaryQueue(queueName)
-	c := consumer.NewBasicConsumer(&consumerConfig, &q)
+	c := consumer.NewConsumer(&consumerConfig, &q)
 	//c.Consume(consumer.DeliveryLogHandler, false)
 	c.Consume(printBody, false)
 	if time.Duration(timeout) > 0 {
