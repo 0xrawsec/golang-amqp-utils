@@ -8,6 +8,7 @@ Properties:
 */
 
 import (
+	"amqpconfig"
 	"fmt"
 
 	"github.com/0xrawsec/amqp"
@@ -65,15 +66,9 @@ func (e *Exchange) String() string {
 		e.Name, e.Type, e.Durable, e.AutoDelete, e.Internal, e.NoWait, e.Args)
 }
 
-// Config structure for Collector
-type Config struct {
-	AmqpURL string
-	Workers int
-}
-
 // Consumer structure
 type Consumer struct {
-	Config     *Config
+	Config     *amqpconfig.Config
 	Queue      *amqp.Queue
 	OutputChan chan interface{}
 	conn       *amqp.Connection
@@ -90,8 +85,8 @@ type Consumer struct {
 	running    bool
 }
 
-// NewBasicConsumer creates a new consumer not using TLS
-func NewBasicConsumer(config *Config, q *Queue) (c Consumer) {
+// NewConsumer creates a new consumer not using TLS
+func NewConsumer(config *amqpconfig.Config, q *Queue) (c Consumer) {
 	var err error
 	c.Config = config
 
@@ -102,7 +97,7 @@ func NewBasicConsumer(config *Config, q *Queue) (c Consumer) {
 
 	c.OutputChan = make(chan interface{}, c.workers)
 
-	c.conn, err = amqp.Dial(config.AmqpURL)
+	c.conn, err = amqp.DialTLS(config.AmqpURL, &(config.TLSConf))
 	if err != nil {
 		panic(err)
 	}

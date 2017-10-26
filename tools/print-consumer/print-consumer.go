@@ -1,8 +1,10 @@
 package main
 
 import (
+	"amqpconfig"
 	"compress/gzip"
 	"consumer"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"io"
@@ -19,12 +21,15 @@ var (
 	debug                   bool
 	queueName, exchangeName string
 	output                  string
+	configPath              string
 	timeout                 args.DurationVar
 
 	exchangeType   = amqp.ExchangeFanout
-	consumerConfig = consumer.Config{
+	consumerConfig = amqpconfig.Config{
 		AmqpURL: os.Getenv("AMQP_URL"),
-		Workers: 1}
+		Workers: 1,
+		TLSConf: tls.Config{}}
+
 	// Stdout by default
 	writer io.Writer = os.Stdout
 )
@@ -42,7 +47,7 @@ func main() {
 	flag.StringVar(&exchangeName, "e", exchangeName, "The exchange to be created")
 	flag.StringVar(&exchangeType, "ex-type", exchangeType, "Type of the exchange to be created")
 	flag.StringVar(&output, "o", output, "Dumps the result (gzipped) into a file instead of printing")
-
+	flag.StringVar(&configPath, "c", configPath, "Path to configuration file")
 	flag.Var(&timeout, "t", "Timeout for consumer")
 	flag.Parse()
 
@@ -81,6 +86,17 @@ func main() {
 	}
 
 	// We consume the messages and process those with printBody method
+	if configPath != "" {
+		var err error
+		consumerConfig, err = amqpconfig.LoadConfigFromFile(configPath)
+		if err != nil {
+			log.LogErrorAndExit(fmt.Errorf("Failed to load configuration: %s", err))
+		}
+	}
+
+	q := consumer.TemporaryQueue(queueName)
+	c := consumer.NewConsumer(&consumerConfig, &q)
+	//c.Consume(consumer.DeliveryLogHandler, false)
 	c.Consume(printBody, false)
 
 	// We kill the consumer after a given amount of time

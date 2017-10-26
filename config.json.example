@@ -1,0 +1,9 @@
+{
+  "amqp-url": "amqps://guest:guest@rabbitmq-01",
+  "ca-cert": "/path/to/CA/cacert.pem",
+  "client-keypair": {
+    "client-cert": "/path/to/client/cert.pem",
+    "client-key": "/path/to/client/key.pem"
+  },
+  "workers": 10
+}
