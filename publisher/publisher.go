@@ -33,14 +33,14 @@ func NewPublisher(config *amqpconfig.Config) (p Publisher) {
 	}
 	// Notification when the connection closes
 	go func() {
-		log.Infof("Closing connection: %s", <-p.conn.NotifyClose(make(chan *amqp.Error)))
+		log.Debugf("Closing connection: %s", <-p.conn.NotifyClose(make(chan *amqp.Error)))
 	}()
 	p.channel, err = p.conn.Channel()
 	if err != nil {
 		log.LogErrorAndExit(err)
 	}
 	go func() {
-		log.Infof("Closing channel: %s", <-p.channel.NotifyClose(make(chan *amqp.Error)))
+		log.Debugf("Closing channel: %s", <-p.channel.NotifyClose(make(chan *amqp.Error)))
 	}()
 
 	return
