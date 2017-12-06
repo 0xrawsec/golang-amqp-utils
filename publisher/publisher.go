@@ -51,6 +51,10 @@ func NewPublisher(config *amqpconfig.Config) (p Publisher, err error) {
 
 // PublishKey publishes a message to a Queue only
 func (p *Publisher) PublishKey(key string, mandatory, immediate bool, msg amqp.Publishing) error {
+	// Prevent use of nil channel
+	if p.channel == nil {
+		return amqp.ErrClosed
+	}
 	if err := p.channel.Publish("", key, mandatory, immediate, msg); err != nil {
 		log.Errorf("Cannot forward: %s", err)
 		return err
@@ -60,6 +64,10 @@ func (p *Publisher) PublishKey(key string, mandatory, immediate bool, msg amqp.P
 
 // PublishExchange publishes a message to an Exchange only
 func (p *Publisher) PublishExchange(eName string, mandatory, immediate bool, msg amqp.Publishing) error {
+	// Prevent use of nil channel
+	if p.channel == nil {
+		return amqp.ErrClosed
+	}
 	if err := p.channel.Publish(eName, "", mandatory, immediate, msg); err != nil {
 		log.Errorf("Cannot forward: %s", err)
 		return err
