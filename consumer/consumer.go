@@ -86,8 +86,7 @@ type Consumer struct {
 }
 
 // NewConsumer creates a new consumer not using TLS
-func NewConsumer(config *amqpconfig.Config, q *Queue) (c Consumer) {
-	var err error
+func NewConsumer(config *amqpconfig.Config, q *Queue) (c Consumer, err error) {
 	c.Config = config
 
 	c.workers = c.Config.Workers
@@ -99,7 +98,7 @@ func NewConsumer(config *amqpconfig.Config, q *Queue) (c Consumer) {
 
 	c.conn, err = amqp.DialTLS(config.AmqpURL, &(config.TLSConf))
 	if err != nil {
-		panic(err)
+		return
 	}
 
 	// Notification when the connection closes
@@ -109,7 +108,7 @@ func NewConsumer(config *amqpconfig.Config, q *Queue) (c Consumer) {
 
 	c.channel, err = c.conn.Channel()
 	if err != nil {
-		log.LogErrorAndExit(err)
+		return
 	}
 
 	go func() {
@@ -120,7 +119,7 @@ func NewConsumer(config *amqpconfig.Config, q *Queue) (c Consumer) {
 	if q != nil {
 		err = c.SetQueue(q)
 		if err != nil {
-			panic(err)
+			return
 		}
 	}
 

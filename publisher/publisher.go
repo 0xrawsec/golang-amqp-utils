@@ -24,12 +24,11 @@ type Publisher struct {
 }
 
 // NewPublisher returns a basic forwarder (no ampq authentication)
-func NewPublisher(config *amqpconfig.Config) (p Publisher) {
-	var err error
+func NewPublisher(config *amqpconfig.Config) (p Publisher, err error) {
 	p.Config = config
 	p.conn, err = amqp.DialTLS(config.AmqpURL, &(config.TLSConf))
 	if err != nil {
-		panic(err)
+		return
 	}
 	// Notification when the connection closes
 	go func() {
@@ -37,7 +36,7 @@ func NewPublisher(config *amqpconfig.Config) (p Publisher) {
 	}()
 	p.channel, err = p.conn.Channel()
 	if err != nil {
-		log.LogErrorAndExit(err)
+		return
 	}
 	go func() {
 		log.Debugf("Closing channel: %s", <-p.channel.NotifyClose(make(chan *amqp.Error)))

@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"os/signal"
 	"sync"
@@ -33,6 +34,7 @@ var (
 		Workers: 1,
 		TLSConf: tls.Config{}}
 
+	retryTimeout = time.Second * 10
 	// Stdout by default
 	writer io.Writer = os.Stdout
 	mutex            = sync.Mutex{}
@@ -135,7 +137,19 @@ func main() {
 	}
 
 	q := consumer.TemporaryQueue(queueName)
-	c := consumer.NewConsumer(&consumerConfig, &q)
+	c, err := consumer.NewConsumer(&consumerConfig, &q)
+
+ConsumerErrorCheck:
+	if err != nil {
+		switch err.(type) {
+		case net.Error:
+			log.Errorf("Network error trying again in %s: %s", retryTimeout, err)
+			c, err = consumer.NewConsumer(&consumerConfig, &q)
+			goto ConsumerErrorCheck
+		default:
+			log.LogErrorAndExit(err)
+		}
+	}
 
 	// If there is an exchange
 	if exchangeName != "" {
