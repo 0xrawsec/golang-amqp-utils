@@ -21,6 +21,7 @@ type Publisher struct {
 	conn         *amqp.Connection
 	channel      *amqp.Channel
 	confirmation chan amqp.Confirmation
+	up           bool
 }
 
 // NewPublisher returns a basic forwarder (no ampq authentication)
@@ -33,6 +34,7 @@ func NewPublisher(config *amqpconfig.Config) (p Publisher, err error) {
 	// Notification when the connection closes
 	go func() {
 		log.Debugf("Closing connection: %s", <-p.conn.NotifyClose(make(chan *amqp.Error)))
+		p.up = false
 	}()
 	p.channel, err = p.conn.Channel()
 	if err != nil {
@@ -40,8 +42,10 @@ func NewPublisher(config *amqpconfig.Config) (p Publisher, err error) {
 	}
 	go func() {
 		log.Debugf("Closing channel: %s", <-p.channel.NotifyClose(make(chan *amqp.Error)))
+		p.up = false
 	}()
 
+	p.up = true
 	return
 }
 
@@ -77,8 +81,14 @@ func (p *Publisher) Publish(exchange, key string, mandatory, immediate bool, msg
 	return nil
 }
 
+// IsUp tells that the publisher is up and thus can be used for publishing
+func (p *Publisher) IsUp() bool {
+	return p.up
+}
+
 // Close closes the publisher
 func (p *Publisher) Close() error {
+	p.up = false
 	return p.conn.Close()
 }
 
