@@ -1,9 +1,7 @@
 package main
 
 import (
-	"amqpconfig"
 	"compress/gzip"
-	"consumer"
 	"crypto/tls"
 	"flag"
 	"fmt"
@@ -16,6 +14,8 @@ import (
 
 	"github.com/0xrawsec/amqp"
 	humanize "github.com/0xrawsec/go-humanize"
+	"github.com/0xrawsec/golang-amqp-utils/amqpconfig"
+	"github.com/0xrawsec/golang-amqp-utils/consumer"
 	"github.com/0xrawsec/golang-utils/args"
 	"github.com/0xrawsec/golang-utils/log"
 )

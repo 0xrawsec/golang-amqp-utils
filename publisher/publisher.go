@@ -8,10 +8,10 @@ Properties:
 */
 
 import (
-	"amqpconfig"
 	"encoding/json"
 
 	"github.com/0xrawsec/amqp"
+	"github.com/0xrawsec/golang-amqp-utils/amqpconfig"
 	"github.com/0xrawsec/golang-utils/log"
 )
 
